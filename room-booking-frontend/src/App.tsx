@@ -63,7 +63,7 @@ const emptyRoomForm: RoomFormState = {
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiError) return error.message;
   if (error instanceof Error) return error.message;
-  return 'Неизвестная ошибка. Проверь backend и сеть.';
+  return 'Неизвестная ошибка. Проверь локальное хранилище браузера.';
 }
 
 function buildRoomPayload(form: RoomFormState): RoomCreateRequest {
@@ -378,11 +378,11 @@ export default function App() {
 
             <section className="hero-card">
               <div>
-                <p className="eyebrow">CoSpace Booking</p>
+                <p className="eyebrow">Room Flow</p>
                 <h1>Бронируйте переговорные без хаоса в расписании</h1>
                 <p>
                   Умный поиск по вместимости и времени, личные бронирования, админская зона и аккуратная
-                  интеграция с Kotlin backend.
+                  работа полностью на локальных данных без отдельного backend.
                 </p>
               </div>
               <div className="hero-metrics">
@@ -484,11 +484,11 @@ function AuthScreen({ authMode, setAuthMode, loading, onSubmit, onDemoLogin, api
   return (
     <main className="landing-page">
       <header className="landing-header">
-        <button className="landing-brand" type="button" aria-label="RoomFlow">
+        <button className="landing-brand" type="button" aria-label="Room Flow">
           <span className="landing-logo">RF</span>
           <span>
-            <strong>RoomFlow</strong>
-            <small>workspace booking</small>
+            <strong>Room Flow</strong>
+            <small>local workspace booking</small>
           </span>
         </button>
 
@@ -509,7 +509,7 @@ function AuthScreen({ authMode, setAuthMode, loading, onSubmit, onDemoLogin, api
           <span className="premium-badge">Платформа для управления переговорными</span>
           <h1>Бронируйте рабочие пространства за пару кликов</h1>
           <p>
-            RoomFlow помогает сотрудникам быстро находить свободные переговорные, а администраторам —
+            Room Flow помогает сотрудникам быстро находить свободные переговорные, а администраторам —
             управлять помещениями, расписанием и загрузкой офиса в едином интерфейсе.
           </p>
 
@@ -612,7 +612,7 @@ function AuthScreen({ authMode, setAuthMode, loading, onSubmit, onDemoLogin, api
           <FeatureItem title="Мгновенный поиск" text="Фильтры по времени и вместимости показывают только реально доступные комнаты." />
           <FeatureItem title="Прозрачное расписание" text="Сотрудники видят свои брони, статусы и детали встречи без лишних уточнений." />
           <FeatureItem title="Админ-панель" text="Добавление комнат, управление пользователями и контроль всех бронирований из одного места." />
-          <FeatureItem title="Готово к масштабированию" text="Интерфейс аккуратно отделён от API и готов к дальнейшему деплою на Railway." />
+          <FeatureItem title="Работает без backend" text="Данные комнат, пользователей и бронирований хранятся локально в браузере." />
         </div>
       </section>
 
@@ -634,7 +634,7 @@ function AuthScreen({ authMode, setAuthMode, loading, onSubmit, onDemoLogin, api
           <div className="auth-card-header">
             <div>
               <p className="eyebrow">Добро пожаловать</p>
-              <h2>{authMode === 'login' ? 'Вход в RoomFlow' : 'Создание аккаунта'}</h2>
+              <h2>{authMode === 'login' ? 'Вход в Room Flow' : 'Создание аккаунта'}</h2>
             </div>
             <div className="mode-switch">
               <button className={cls(authMode === 'login' && 'active')} onClick={() => setAuthMode('login')}>
@@ -665,7 +665,7 @@ function AuthScreen({ authMode, setAuthMode, loading, onSubmit, onDemoLogin, api
             </label>
 
             <button className="primary-button full" disabled={loading}>
-              {loading ? 'Подключаемся...' : authMode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+              {loading ? 'Входим...' : authMode === 'login' ? 'Войти' : 'Зарегистрироваться'}
             </button>
           </form>
 
@@ -675,7 +675,7 @@ function AuthScreen({ authMode, setAuthMode, loading, onSubmit, onDemoLogin, api
           </div>
 
           <div className="api-note compact-note">
-            <span>API</span>
+            <span>Данные</span>
             <code>{apiBase}</code>
           </div>
         </section>
@@ -732,9 +732,9 @@ function Sidebar({ user, view, setView, onLogout }: SidebarProps) {
   return (
     <aside className="sidebar">
       <div className="logo-block">
-        <div className="logo-mark">CS</div>
+        <div className="logo-mark">RF</div>
         <div>
-          <strong>CoSpace</strong>
+          <strong>Room Flow</strong>
           <span>Booking</span>
         </div>
       </div>
@@ -1146,12 +1146,11 @@ function ProfileView({ user, apiBase, onLogout }: { user: UserResponse; apiBase:
 
       <div className="admin-card profile-info">
         <h3>Подключение</h3>
-        <div className="info-row"><span>Backend API</span><code>{apiBase}</code></div>
+        <div className="info-row"><span>Backend Данные</span><code>{apiBase}</code></div>
         <div className="info-row"><span>Аккаунт создан</span><strong>{formatDateTime(user.createdAt)}</strong></div>
         <div className="info-row"><span>Статус</span><strong>{user.enabled ? 'Активен' : 'Отключён'}</strong></div>
         <p>
-          Для локального запуска backend должен быть доступен на порту 8080, а фронтенд — на 5173.
-          В backend уже разрешён CORS для этого origin.
+          Отдельный backend не требуется: демо-данные, пользователи, комнаты и бронирования сохраняются в localStorage текущего браузера.
         </p>
       </div>
     </section>
