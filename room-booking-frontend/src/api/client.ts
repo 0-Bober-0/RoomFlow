@@ -16,7 +16,7 @@ import type {
 
 const STORAGE_KEY = 'roomflow_local_store_v2';
 const TOKEN_PREFIX = 'roomflow-local-token:';
-const LOCAL_API_LABEL = 'LocalStorage / Browser API';
+const LOCAL_API_LABEL = 'Very cool app';
 
 interface LocalStore {
   users: Array<UserResponse & { password: string }>;
