@@ -649,7 +649,7 @@ function AuthScreen({ authMode, setAuthMode, loading, onSubmit, onDemoLogin, api
             {authMode === 'register' && (
               <label>
                 ФИО
-                <input name="fullName" required minLength={2} placeholder="Иван Петров" />
+                <input name="fullName" required minLength={2} placeholder="Александр Даев" />
               </label>
             )}
 
@@ -1148,9 +1148,6 @@ function ProfileView({ user, apiBase, onLogout }: { user: UserResponse; apiBase:
         <div className="info-row"><span>Backend Данные</span><code>{apiBase}</code></div>
         <div className="info-row"><span>Аккаунт создан</span><strong>{formatDateTime(user.createdAt)}</strong></div>
         <div className="info-row"><span>Статус</span><strong>{user.enabled ? 'Активен' : 'Отключён'}</strong></div>
-        <p>
-          Отдельный backend не требуется: демо-данные, пользователи, комнаты и бронирования сохраняются в localStorage текущего браузера.
-        </p>
       </div>
     </section>
   );

@@ -83,7 +83,7 @@ function seedStore(): LocalStore {
   const user: LocalStore['users'][number] = {
     id: 'user-demo',
     email: 'user@coworking.local',
-    fullName: 'Иван Петров',
+    fullName: 'Александр Даев',
     role: 'USER',
     enabled: true,
     createdAt,
