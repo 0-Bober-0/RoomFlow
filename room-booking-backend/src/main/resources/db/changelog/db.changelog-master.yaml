@@ -1,0 +1,243 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-enable-postgres-extensions
+      author: chatgpt
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+  - changeSet:
+      id: 002-create-users
+      author: chatgpt
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password_hash
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: full_name
+                  type: varchar(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: enabled
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role in ('USER', 'ADMIN'));
+        - createIndex:
+            tableName: users
+            indexName: idx_users_email
+            unique: true
+            columns:
+              - column:
+                  name: email
+
+  - changeSet:
+      id: 003-create-rooms
+      author: chatgpt
+      changes:
+        - createTable:
+            tableName: rooms
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: location
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: capacity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price_per_hour
+                  type: numeric(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: ALTER TABLE rooms ADD CONSTRAINT rooms_capacity_check CHECK (capacity > 0);
+        - sql:
+            sql: ALTER TABLE rooms ADD CONSTRAINT rooms_price_check CHECK (price_per_hour >= 0);
+        - createIndex:
+            tableName: rooms
+            indexName: idx_rooms_active_capacity
+            columns:
+              - column:
+                  name: active
+              - column:
+                  name: capacity
+
+  - changeSet:
+      id: 004-create-bookings
+      author: chatgpt
+      changes:
+        - createTable:
+            tableName: bookings
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: room_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: starts_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ends_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: purpose
+                  type: varchar(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: bookings
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_bookings_user
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: bookings
+            baseColumnNames: room_id
+            referencedTableName: rooms
+            referencedColumnNames: id
+            constraintName: fk_bookings_room
+            onDelete: RESTRICT
+        - sql:
+            sql: ALTER TABLE bookings ADD CONSTRAINT bookings_status_check CHECK (status in ('CONFIRMED', 'CANCELLED'));
+        - sql:
+            sql: ALTER TABLE bookings ADD CONSTRAINT bookings_time_check CHECK (ends_at > starts_at);
+        - createIndex:
+            tableName: bookings
+            indexName: idx_bookings_user_starts_at
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: starts_at
+        - createIndex:
+            tableName: bookings
+            indexName: idx_bookings_room_starts_at
+            columns:
+              - column:
+                  name: room_id
+              - column:
+                  name: starts_at
+        - createIndex:
+            tableName: bookings
+            indexName: idx_bookings_status
+            columns:
+              - column:
+                  name: status
+
+  - changeSet:
+      id: 005-booking-no-overlap-constraint
+      author: chatgpt
+      changes:
+        - sql:
+            splitStatements: false
+            sql: |
+              ALTER TABLE bookings
+              ADD CONSTRAINT bookings_no_overlap
+              EXCLUDE USING gist (
+                room_id WITH =,
+                tstzrange(starts_at, ends_at, '[)') WITH &&
+              )
+              WHERE (status = 'CONFIRMED');
